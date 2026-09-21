@@ -1,5 +1,14 @@
 module(name = "com_github_mvukov_rules_ros2")
 
+bazel_dep(name = "hedron_compile_commands", dev_dependency = True)
+
+# Get a patch for graceful header handling
+git_override(
+    module_name = "hedron_compile_commands",
+    commit = "d107d9c9025915902fd52346f1c6e18d87f7013a",
+    remote = "https://github.com/izashchelkin/bazel-compile-commands-extractor.git",
+)
+
 bazel_dep(name = "asio", version = "1.32.0")
 bazel_dep(name = "bazel_skylib", version = "1.9.0")
 bazel_dep(name = "boringssl", version = "0.20251124.0")
@@ -12,7 +21,7 @@ bazel_dep(name = "nlohmann_json", version = "3.12.0.bcr.1")
 bazel_dep(name = "platforms", version = "1.1.0")
 bazel_dep(name = "pybind11_bazel", version = "3.0.0")
 bazel_dep(name = "readerwriterqueue", version = "1.0.6")
-bazel_dep(name = "rules_cc", version = "0.2.16")
+bazel_dep(name = "rules_cc", version = "0.2.17")
 bazel_dep(name = "rules_foreign_cc", version = "0.15.1")
 bazel_dep(name = "rules_python", version = "2.0.2")
 bazel_dep(name = "rules_rust", version = "0.68.1")
@@ -26,6 +35,8 @@ bazel_dep(name = "websocketpp", version = "0.8.2.bcr.6")
 bazel_dep(name = "yaml-cpp", version = "0.8.0.bcr.1")
 bazel_dep(name = "zlib", version = "1.3.1.bcr.8")
 bazel_dep(name = "zstd", version = "1.5.7")
+bazel_dep(name = "sdformat", version = "16.1.0")
+# bazel_dep(name = "tl-expected", version = "1.3.1") # already available when using cpp_polyfill for tcb_span
 
 bazel_dep(name = "googletest", version = "1.17.0.bcr.2", dev_dependency = True)
 
@@ -149,14 +160,19 @@ use_repo(crate, "rules_ros2_crate_index")
 rules_ros2_non_module_deps = use_extension("//ros2:extensions.bzl", "non_module_deps")
 use_repo(
     rules_ros2_non_module_deps,
+    "control_msgs",
+    "cpp_polyfills",
     "cyclonedds",
     "foxglove_bridge",
     "iceoryx",
     "osrf_pycommon",
+    "pal_statistics",
+    "realtime_tools",
     "ros2",
     "ros2_ament_index",
     "ros2_class_loader",
     "ros2_common_interfaces",
+    "ros2_control",
     "ros2_diagnostics",
     "ros2_geometry2",
     "ros2_image_common",
@@ -195,5 +211,7 @@ use_repo(
     "ros2_urdfdom_headers",
     "ros2_xacro",
     "ros2cli",
+    "rsl",
     "rules_ros2_config_clang",
+    "sdformat_urdf",
 )

@@ -1,0 +1,30 @@
+load("@com_github_mvukov_rules_ros2//repositories:generate_export_header.bzl", "generate_export_header")
+load("@com_github_mvukov_rules_ros2//ros2:cc_defs.bzl", "ros2_cpp_library")
+
+generate_export_header(
+    name = "rsl_export",
+    library_name = "rsl",
+    output = "rsl/export.hpp",
+)
+
+ros2_cpp_library(
+    name = "rsl",
+    srcs = glob(
+        [
+            "src/*.cpp",
+        ],
+    ),
+    hdrs = glob([
+        "include/rsl/*.hpp",
+    ]),
+    strip_include_prefix = "include",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":rsl_export",
+        "@cpp_polyfills//:tcb_span",
+        "@cpp_polyfills//:tl_expected",
+        "@eigen",
+        "@fmt",
+        "@ros2_rclcpp//:rclcpp",
+    ],
+)

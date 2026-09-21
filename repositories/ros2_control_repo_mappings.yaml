@@ -1,0 +1,25 @@
+repositories:
+  ros2_control:
+    name: ros2_control
+    build_file: "@com_github_mvukov_rules_ros2//repositories:ros2_control.BUILD.bazel"
+  realtime_tools:
+    name: realtime_tools
+    build_file: "@com_github_mvukov_rules_ros2//repositories:realtime_tools.BUILD.bazel"
+  control_msgs:
+    name: control_msgs
+    build_file: "@com_github_mvukov_rules_ros2//repositories:control_msgs.BUILD.bazel"
+  pal_statistics:
+    name: pal_statistics
+    build_file: "@com_github_mvukov_rules_ros2//repositories:pal_statistics.BUILD.bazel"
+  sdformat_urdf:
+    name: sdformat_urdf
+    build_file: "@com_github_mvukov_rules_ros2//repositories:sdformat_urdf.BUILD.bazel"
+  cpp_polyfill:
+    name: cpp_polyfill
+    build_file: "@com_github_mvukov_rules_ros2//repositories:cpp_polyfill.BUILD.bazel"
+  rsl:
+    name: rsl
+    build_file: "@com_github_mvukov_rules_ros2//repositories:rsl.BUILD.bazel"
+  generate_parameter_library:
+    name: generate_parameter_library
+    build_file: "@com_github_mvukov_rules_ros2//repositories:generate_parameter_library.BUILD.bazel"

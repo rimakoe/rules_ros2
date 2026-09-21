@@ -25,7 +25,7 @@ build --sandbox_default_allow_network=false
 build --incompatible_disallow_empty_glob
 
 # Will probably be flipped in Bazel 9.
-build --incompatible_autoload_externally=
+# build --incompatible_autoload_externally=
 
 # Don't let local Python site packages leak into the build and cause problems
 common --action_env=PYTHONNOUSERSITE=1

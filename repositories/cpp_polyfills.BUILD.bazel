@@ -1,0 +1,25 @@
+#load("@com_github_mvukov_rules_ros2//ros2:cc_defs.bzl", "ros2_cpp_library")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+cc_library(
+    name = "tcb_span",
+    srcs = [],
+    hdrs = glob([
+        "tcb_span/include/tcb_span/*.hpp",
+    ]),
+    strip_include_prefix = "tcb_span/include",
+    visibility = ["//visibility:public"],
+    deps = [],
+)
+
+cc_library(
+    name = "tl_expected",
+    srcs = [],
+    hdrs = glob([
+        "tl_expected/include/tl_expected/*.hpp",
+    ]),
+    include_prefix = "tl",
+    strip_include_prefix = "tl_expected/include/tl_expected",
+    visibility = ["//visibility:public"],
+    deps = [],
+)

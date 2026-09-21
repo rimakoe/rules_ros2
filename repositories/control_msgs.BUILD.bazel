@@ -1,0 +1,40 @@
+load(
+    "@com_github_mvukov_rules_ros2//ros2:interfaces.bzl",
+    "c_ros2_interface_library",
+    "cpp_ros2_interface_library",
+    "py_ros2_interface_library",
+    "ros2_interface_library",
+)
+
+ros2_interface_library(
+    name = "control_msgs",
+    srcs = glob(["control_msgs/msg/*.msg"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "@ros2_common_interfaces//:diagnostic_msgs",
+        "@ros2_common_interfaces//:geometry_msgs",
+        "@ros2_common_interfaces//:sensor_msgs",
+        "@ros2_common_interfaces//:std_msgs",
+        "@ros2_common_interfaces//:trajectory_msgs",
+        "@ros2_rcl_interfaces//:action_msgs",
+        "@ros2_rcl_interfaces//:builtin_interfaces",
+    ],
+)
+
+c_ros2_interface_library(
+    name = "c_control_msgs",
+    visibility = ["//visibility:public"],
+    deps = [":control_msgs"],
+)
+
+cpp_ros2_interface_library(
+    name = "cpp_control_msgs",
+    visibility = ["//visibility:public"],
+    deps = [":control_msgs"],
+)
+
+py_ros2_interface_library(
+    name = "py_control_msgs",
+    visibility = ["//visibility:public"],
+    deps = [":control_msgs"],
+)

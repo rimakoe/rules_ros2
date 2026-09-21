@@ -190,6 +190,18 @@ ros2_interface_library(
     deps = [":builtin_interfaces"],
 )
 
+cpp_ros2_interface_library(
+    name = "cpp_service_msgs",
+    visibility = ["//visibility:public"],
+    deps = [":service_msgs"],
+)
+
+py_ros2_interface_library(
+    name = "py_service_msgs",
+    visibility = ["//visibility:public"],
+    deps = [":service_msgs"],
+)
+
 ros2_interface_library(
     name = "type_description_interfaces",
     srcs = glob([

@@ -1,0 +1,26 @@
+load("@com_github_mvukov_rules_ros2//ros2:cc_defs.bzl", "ros2_cpp_library")
+
+ros2_cpp_library(
+    name = "sdformat_urdf",
+    srcs = glob(
+        [
+            "sdformat_urdf/src/*.cpp",
+        ],
+    ),
+    hdrs = glob([
+        "sdformat_urdf/include/sdformat_urdf/*.hpp",
+    ]),
+    strip_include_prefix = "sdformat_urdf/include",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@fmt",
+        "@pal_statistics//:cpp_pal_statistics",
+        "@ros2_pluginlib//:pluginlib",
+        "@ros2_rcutils//:rcutils",
+        "@ros2_urdf//:urdf",
+        "@ros2_urdf//:urdf_parser_plugin",
+        "@ros2_urdfdom_headers//:urdfdom_headers",
+        "@sdformat",
+        "@tinyxml2",
+    ],
+)

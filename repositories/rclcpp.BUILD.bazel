@@ -9,9 +9,17 @@ load(
     "@com_github_mvukov_rules_ros2//repositories:rclcpp_interfaces.bzl",
     "rclcpp_interfaces",
 )
+load("@com_github_mvukov_rules_ros2//repositories:ros2_version.bzl", "ros_generate_version_header")
 load("@com_github_mvukov_rules_ros2//ros2:cc_defs.bzl", "ros2_cpp_library")
 load("@rules_python//python:defs.bzl", "py_binary")
 load("@rules_ros2_pip_deps//:requirements.bzl", "requirement")
+
+ros_generate_version_header(
+    name = "rclcpp_version",
+    package_name = "rclcpp",
+    target = ":rclcpp",
+    version = "28.0.0",
+)
 
 _GENERATE_LOGGING_MACROS_PY = "@com_github_mvukov_rules_ros2//repositories:generate_rclcpp_logging_macros.py"
 
@@ -76,6 +84,7 @@ ros2_cpp_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
+        ":rclcpp_version",
         "@ros2_ament_index//:ament_index_cpp",
         "@ros2_libstatistics_collector//:libstatistics_collector",
         "@ros2_rcl//:rcl",

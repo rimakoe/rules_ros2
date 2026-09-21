@@ -1,0 +1,31 @@
+#load("@com_github_mvukov_rules_ros2//ros2:cc_defs.bzl", "ros2_cpp_library")
+load("@rules_python//python:defs.bzl", "py_binary", "py_library")
+load("@rules_ros2_pip_deps//:requirements.bzl", "requirement")
+
+filegroup(
+    name = "data",
+    srcs = glob(["generate_parameter_library_py/generate_parameter_library_py/**"]),
+)
+
+py_library(
+    name = "generate_parameter_library_lib",
+    srcs = glob(["generate_parameter_library_py/generate_parameter_library_py/*.py"]),
+    data = [":data"],
+    imports = ["generate_parameter_library_py"],
+    visibility = ["//visibility:public"],
+    deps = [
+        requirement("pyyaml"),
+        requirement("jinja2"),
+        requirement("typeguard"),
+    ],
+)
+
+py_binary(
+    name = "generate_parameter_library",
+    srcs = ["generate_parameter_library_py/generate_parameter_library_py/generate_cpp_header.py"],
+    main = "generate_cpp_header.py",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":generate_parameter_library_lib",
+    ],
+)

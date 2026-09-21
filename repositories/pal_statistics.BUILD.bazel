@@ -1,0 +1,70 @@
+load("@com_github_mvukov_rules_ros2//ros2:cc_defs.bzl", "ros2_cpp_library")
+load(
+    "@com_github_mvukov_rules_ros2//ros2:interfaces.bzl",
+    "c_ros2_interface_library",
+    "cpp_ros2_interface_library",
+    "py_ros2_interface_library",
+    "ros2_interface_library",
+)
+load("@rules_python//python:defs.bzl", "py_library")
+
+ros2_interface_library(
+    name = "pal_statistics_msgs",
+    srcs = glob(["pal_statistics_msgs/msg/*.msg"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "@ros2_common_interfaces//:std_msgs",
+    ],
+)
+
+c_ros2_interface_library(
+    name = "c_pal_statistics_msgs",
+    visibility = ["//visibility:public"],
+    deps = [":pal_statistics_msgs"],
+)
+
+cpp_ros2_interface_library(
+    name = "cpp_pal_statistics_msgs",
+    visibility = ["//visibility:public"],
+    deps = [":pal_statistics_msgs"],
+)
+
+py_ros2_interface_library(
+    name = "py_pal_statistics_msgs",
+    visibility = ["//visibility:public"],
+    deps = [":pal_statistics_msgs"],
+)
+
+ros2_cpp_library(
+    name = "cpp_pal_statistics",
+    srcs = glob(
+        [
+            "pal_statistics/src/*.cpp",
+            "pal_statistics/src/*.hpp",
+        ],
+    ),
+    hdrs = glob([
+        "pal_statistics/include/pal_statistics/*.hpp",
+    ]),
+    strip_include_prefix = "pal_statistics/include",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":cpp_pal_statistics_msgs",
+        "@ros2_rclcpp//:rclcpp",
+        "@ros2_rclcpp//:rclcpp_lifecycle",
+    ],
+)
+
+py_library(
+    name = "py_pal_statistics",
+    srcs = glob(
+        [
+            "pal_statistics/pal_statistics/*.py",
+        ],
+    ),
+    visibility = ["//visibility:public"],
+    deps = [
+        ":py_pal_statistics_msgs",
+        "@ros2_rclpy//:rclpy",
+    ],
+)

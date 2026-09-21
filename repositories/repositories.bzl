@@ -333,3 +333,71 @@ def ros2_repositories():
         strip_prefix = "rcl_logging_syslog-1b8165639d34f6321f725de5b4d72effb2d15314",
         urls = ["https://github.com/fujitatomoya/rcl_logging_syslog/archive/1b8165639d34f6321f725de5b4d72effb2d15314.zip"],
     )
+
+def ros2_control_repositories():
+    """Import ROS 2 Control repositories."""
+
+    maybe(
+        http_archive,
+        name = "ros2_control",
+        build_file = "@com_github_mvukov_rules_ros2//repositories:ros2_control.BUILD.bazel",
+        sha256 = "b4da3c0bc19dee63e673590b06d73f2d2f3fd6f4d3b272680e81a18ac2a71502",
+        strip_prefix = "ros2_control-6.10.1",
+        url = "https://github.com/ros-controls/ros2_control/archive/refs/tags/6.10.1.tar.gz",
+    )
+    maybe(
+        http_archive,
+        name = "realtime_tools",
+        build_file = "@com_github_mvukov_rules_ros2//repositories:realtime_tools.BUILD.bazel",
+        sha256 = "5bfb37d56c2a05fb90d491f845ee21e20f2da18fd801bd7b8cc62be17ecc900b",
+        strip_prefix = "realtime_tools-5.3.0",
+        url = "https://github.com/ros-controls/realtime_tools/archive/refs/tags/5.3.0.tar.gz",
+    )
+    maybe(
+        http_archive,
+        name = "control_msgs",
+        build_file = "@com_github_mvukov_rules_ros2//repositories:control_msgs.BUILD.bazel",
+        sha256 = "4ba6d784d0235a7845c0008e819dca10d2bd4ba6f69e75ca98638425bf7c43e4",
+        strip_prefix = "control_msgs-6.10.0",
+        url = "https://github.com/ros-controls/control_msgs/archive/refs/tags/6.10.0.tar.gz",
+    )
+    maybe(
+        http_archive,
+        name = "sdformat_urdf",
+        build_file = "@com_github_mvukov_rules_ros2//repositories:sdformat_urdf.BUILD.bazel",
+        sha256 = "a6cb7b23fcf4243cc87a7de35a42b0d8dd3376f0a25e0599d84a9b93ca58c5d4",
+        strip_prefix = "sdformat_urdf-1.0.2",
+        url = "https://github.com/ros/sdformat_urdf/archive/refs/tags/1.0.2.tar.gz",
+    )
+    maybe(
+        http_archive,
+        name = "pal_statistics",
+        build_file = "@com_github_mvukov_rules_ros2//repositories:pal_statistics.BUILD.bazel",
+        sha256 = "1f490c03c36c9c41a61690d8a25a57aabad115a22f6d562ebb177926b77e7ea3",
+        strip_prefix = "pal_statistics-2.7.0",
+        url = "https://github.com/pal-robotics/pal_statistics/archive/refs/tags/2.7.0.tar.gz",
+    )
+    maybe(
+        http_archive,
+        name = "cpp_polyfills",
+        build_file = "@com_github_mvukov_rules_ros2//repositories:cpp_polyfills.BUILD.bazel",
+        sha256 = "6709d3cfab992e72b85bd902ee43f90bfc45c76719e0a8d7ba685e9a7890e379",
+        strip_prefix = "cpp_polyfills-1.3.2",
+        url = "https://github.com/PickNikRobotics/cpp_polyfills/archive/refs/tags/1.3.2.zip",
+    )
+    maybe(
+        http_archive,
+        name = "rsl",
+        build_file = "@com_github_mvukov_rules_ros2//repositories:rsl.BUILD.bazel",
+        sha256 = "c6f53e378969a87e9b5f23c494494e1101c7a33674372854030a8a33915d3280",
+        strip_prefix = "RSL-1.3.0",
+        url = "https://github.com/PickNikRobotics/RSL/archive/refs/tags/1.3.0.zip",
+    )
+    maybe(
+        http_archive,
+        name = "generate_parameter_library",
+        build_file = "@com_github_mvukov_rules_ros2//repositories:generate_parameter_library.BUILD.bazel",
+        sha256 = "eff6b683362e14b2663d67e1756c1368d1e7b8ba665ba052308a6a1330fc832a",
+        strip_prefix = "generate_parameter_library-1.3.0",
+        url = "https://github.com/PickNikRobotics/generate_parameter_library/archive/refs/tags/1.3.0.zip",
+    )
