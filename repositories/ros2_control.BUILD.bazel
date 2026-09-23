@@ -10,6 +10,7 @@ load(
     "py_ros2_interface_library",
     "ros2_interface_library",
 )
+load("@com_github_mvukov_rules_ros2//ros2:py_defs.bzl", "ros2_py_binary")
 load("@rules_python//python:defs.bzl", "py_binary", "py_library")
 load("@rules_ros2_pip_deps//:requirements.bzl", "requirement")
 
@@ -139,7 +140,6 @@ ros2_cpp_library(
     hdrs = glob([
         "controller_manager/include/controller_manager/*.hpp",
     ]),
-    #data = ["controller_manager/src/controller_manager_parameters.yaml"],
     strip_include_prefix = "controller_manager/include",
     visibility = ["//visibility:public"],
     deps = [
@@ -165,6 +165,8 @@ ros2_cpp_binary(
         "controller_manager/src/ros2_control_node.cpp",
         "controller_manager/src/sleeping_policies.cpp",
     ],
+    ros2_package_name = "controller_manager",
+    #set_up_ament = True,
     visibility = ["//visibility:public"],
     deps = [
         ":controller_manager",
@@ -186,10 +188,12 @@ py_library(
     ],
 )
 
-py_binary(
+ros2_py_binary(
     name = "spawner",
     srcs = ["controller_manager/controller_manager/spawner.py"],
     imports = ["controller_manager"],
+    main = "controller_manager/controller_manager/spawner.py",
+    #set_up_ament = True,
     visibility = ["//visibility:public"],
     deps = [
         ":controller_manager_py",
@@ -198,10 +202,12 @@ py_binary(
     ],
 )
 
-py_binary(
+ros2_py_binary(
     name = "unspawner",
     srcs = ["controller_manager/controller_manager/unspawner.py"],
     imports = ["controller_manager"],
+    main = "controller_manager/controller_manager/unspawner.py",
+    #set_up_ament = True,
     visibility = ["//visibility:public"],
     deps = [
         ":controller_manager_py",
@@ -209,10 +215,12 @@ py_binary(
     ],
 )
 
-py_binary(
+ros2_py_binary(
     name = "hardware_spawner",
     srcs = ["controller_manager/controller_manager/hardware_spawner.py"],
     imports = ["controller_manager"],
+    main = "controller_manager/controller_manager/hardware_spawner.py",
+    #set_up_ament = True,
     visibility = ["//visibility:public"],
     deps = [
         ":controller_manager_py",

@@ -12,6 +12,13 @@ load(
     "type_description_aspect",
 )
 load(
+    "@com_github_mvukov_rules_ros2//ros2:package_aspects.bzl",
+    "Ros2BinCollectorAspectInfo",
+    "Ros2LibCollectorAspectInfo",
+    "ros2_binary_collector_aspect",
+    "ros2_library_collector_aspect",
+)
+load(
     "@com_github_mvukov_rules_ros2//ros2:plugin_aspects.bzl",
     "Ros2IdlPluginAspectInfo",
     "Ros2InterfaceCollectorAspectInfo",
@@ -43,11 +50,18 @@ _PACKAGES_PATH = paths.join(_RESOURCE_INDEX_PATH, "packages")
 _PACKAGE_XML = "package.xml"
 
 def _write_package_xml(ctx, prefix_path, package_name):
-    package_xml = ctx.actions.declare_file(
-        paths.join(prefix_path, _PACKAGES_PATH, package_name, _PACKAGE_XML),
+    package = ctx.actions.declare_file(
+        paths.join(prefix_path, _PACKAGES_PATH, package_name),
     )
-    ctx.actions.write(package_xml, _PACKAGE_XML_TEMPLATE.format(package_name = package_name))
-    return package_xml
+    ctx.actions.write(package, "")
+    return package
+
+def _write_package_share_xml(ctx, prefix_path, package_name):
+    share_xml = ctx.actions.declare_file(
+        paths.join(prefix_path, "share", package_name, _PACKAGE_XML),
+    )
+    ctx.actions.write(share_xml, _PACKAGE_XML_TEMPLATE.format(package_name = package_name))
+    return share_xml
 
 def get_plugins_xml_path(plugin_package, plugin_target_name):
     """Returns prefix-path relative plugins XML file."""
@@ -80,11 +94,11 @@ _PLUGIN_XML_TEMPLATE = """\
 def _write_plugins_xml(
         ctx,
         prefix_path,
-        plugin_package,
+        base_package,
         plugin_target_name,
         types_to_bases_and_names):
     plugins_xml = ctx.actions.declare_file(
-        paths.join(prefix_path, get_plugins_xml_path(plugin_package, plugin_target_name)),
+        paths.join(prefix_path, "share", base_package, plugin_target_name + "_plugins.xml"),
     )
 
     plugins = [
@@ -112,6 +126,101 @@ Ros2AmentSetupInfo = provider(
 )
 
 def _ros2_ament_setup_rule_impl(ctx):
+    prefix_path = ctx.attr.name
+    outputs = []
+    registered_packages = []
+
+    bin_infos = depset(
+        transitive = [
+            dep[Ros2BinCollectorAspectInfo].binaries
+            for dep in ctx.attr.deps
+        ],
+    ).to_list()
+    print("Binaries Found: ", len(bin_infos))
+    for info in bin_infos:
+        print("Ros2BinInfo: " + info.package_name)
+        package_name = info.package_name
+        if package_name not in registered_packages:
+            outputs.append(
+                _write_package_xml(
+                    ctx,
+                    prefix_path,
+                    package_name,
+                ),
+            )
+            outputs.append(
+                _write_package_share_xml(
+                    ctx,
+                    prefix_path,
+                    package_name,
+                ),
+            )
+            registered_packages.append(package_name)
+        binary_filepath = ctx.actions.declare_file(
+            paths.join(prefix_path, "lib", package_name, info.target_name),
+        )
+        ctx.actions.symlink(
+            output = binary_filepath,
+            target_file = info.binary,
+        )
+        outputs.append(binary_filepath)
+
+    lib_infos = depset(
+        transitive = [
+            dep[Ros2LibCollectorAspectInfo].libraries
+            for dep in ctx.attr.deps
+        ],
+    ).to_list()
+    print("Libraries Found: ", len(lib_infos))
+    for info in lib_infos:
+        print("Ros2LibInfo: " + info.package_name)
+        package_name = info.package_name
+        if package_name not in registered_packages:
+            outputs.append(
+                _write_package_xml(
+                    ctx,
+                    prefix_path,
+                    package_name,
+                ),
+            )
+            outputs.append(
+                _write_package_share_xml(
+                    ctx,
+                    prefix_path,
+                    package_name,
+                ),
+            )
+            registered_packages.append(package_name)
+
+        if info.library:  # add compiled lib if there exists one
+            library_filepath = ctx.actions.declare_file(
+                paths.join(prefix_path, "lib", "lib" + info.target_name + ".so"),
+            )
+            ctx.actions.symlink(
+                output = library_filepath,
+                target_file = info.library,
+            )
+            outputs.append(library_filepath)
+        for header in info.hdrs:
+            chunks = []
+            prefix = ["include"]
+            if info.strip_include_prefix:
+                prefix = info.strip_include_prefix.split("/")
+            for s in header.short_path.split("/")[::-1]:
+                if prefix[-1] in s:
+                    break
+                chunks = [s] + chunks
+            path = "/".join(chunks)
+
+            header_filepath = ctx.actions.declare_file(
+                paths.join(prefix_path, "include", package_name, path),
+            )
+            ctx.actions.symlink(
+                output = header_filepath,
+                target_file = header,
+            )
+            outputs.append(header_filepath)
+
     plugins = depset(
         transitive = [
             dep[Ros2PluginCollectorAspectInfo].plugins
@@ -119,16 +228,13 @@ def _ros2_ament_setup_rule_impl(ctx):
         ],
     ).to_list()
 
-    prefix_path = ctx.attr.name
-    outputs = []
-    registered_packages = []
     for plugin in plugins:
         plugin_target_name = plugin.target_name
         types_to_bases_and_names = plugin.types_to_bases_and_names
 
         base_package = _get_package_name(types_to_bases_and_names.values()[0][0])
         if base_package not in registered_packages:
-            outputs.append(_write_package_xml(ctx, prefix_path, base_package))
+            #outputs.append(_write_package_xml(ctx, prefix_path, base_package))
             registered_packages.append(base_package)
 
         plugin_package = _get_package_name(types_to_bases_and_names.keys()[0])
@@ -146,7 +252,7 @@ def _ros2_ament_setup_rule_impl(ctx):
         outputs.append(_write_plugins_xml(
             ctx,
             prefix_path,
-            plugin_package,
+            base_package,
             plugin_target_name,
             types_to_bases_and_names,
         ))
@@ -168,6 +274,8 @@ def _ros2_ament_setup_rule_impl(ctx):
     ).to_list()
 
     for plugin in idl_plugins:
+        #print("IDL Plugin: " + plugin.package_name)
+
         package_name = plugin.package_name
 
         if package_name not in registered_packages:
@@ -239,6 +347,7 @@ def _ros2_ament_setup_rule_impl(ctx):
 
     ament_prefix_path = None
     if outputs:
+        # print("ament_prefix: " + prefix_path)
         manifest = ctx.actions.declare_file(paths.join(prefix_path, "manifest.txt"))
         ctx.actions.write(manifest, "\n".join([p.short_path for p in outputs]))
         ament_prefix_path = paths.dirname(manifest.short_path)
@@ -273,6 +382,8 @@ which uses the generated .idl files (falling back to .msg/.srv/.action with a wa
             aspects = [
                 ros2_interface_collector_aspect,
                 ros2_plugin_collector_aspect,
+                ros2_library_collector_aspect,
+                ros2_binary_collector_aspect,
             ],
         ),
         "idl_deps": attr.label_list(

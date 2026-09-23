@@ -1,0 +1,1 @@
+discover all packages in workspace: bazel query 'kind("ros2_package_rule", //...)'

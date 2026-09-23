@@ -3,7 +3,13 @@
 
 load("@com_github_mvukov_rules_ros2//ros2:ament.bzl", "py_exec_launcher", "split_kwargs")
 load("@com_github_mvukov_rules_ros2//third_party:symlink.bzl", "symlink")
-load("@rules_python//python:defs.bzl", "py_binary", "py_test")
+load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
+
+def ros2_py_library(name, srcs, ros2_package_name = None, deps = None, **kwargs):
+    if deps == None:
+        deps = []
+    ros2_package_name = ros2_package_name or name
+    py_library(name = name, srcs = srcs, deps = deps, **kwargs)
 
 def _ros2_py_exec(target, name, srcs, main, set_up_ament, testonly, **kwargs):
     set_up_launcher = testonly or set_up_ament

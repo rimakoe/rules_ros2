@@ -3,11 +3,12 @@
 
 load("@com_github_mvukov_rules_ros2//ros2:ament.bzl", "sh_exec_launcher", "split_kwargs")
 load("@com_github_mvukov_rules_ros2//ros2:cc_opts.bzl", "C_COPTS")
+load("@com_github_mvukov_rules_ros2//ros2:info.bzl", "ros2_cc_binary_info", "ros2_cc_library_info")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
 
-def _ros2_cc_target(target, lang, name, ros2_package_name, **kwargs):
+def _ros2_cc_target(target, lang, name, ros2_package_name, deps = None, **kwargs):
     if lang == "c":
         all_copts = C_COPTS
     elif lang == "cpp":
@@ -15,6 +16,9 @@ def _ros2_cc_target(target, lang, name, ros2_package_name, **kwargs):
     else:
         fail("lang must be set to c or cpp!")
     all_copts = all_copts + kwargs.pop("copts", [])
+
+    if deps == None:
+        deps = kwargs.pop("deps", [])
 
     ros2_package_name = ros2_package_name or name
     all_local_defines = ["ROS_PACKAGE_NAME=\\\"{}\\\"".format(ros2_package_name)]
@@ -24,6 +28,7 @@ def _ros2_cc_target(target, lang, name, ros2_package_name, **kwargs):
         name = name,
         copts = all_copts,
         local_defines = all_local_defines,
+        deps = deps,
         **kwargs
     )
 
@@ -38,7 +43,10 @@ def ros2_c_library(name, ros2_package_name = None, **kwargs):
             Otherwise, the `name` is used as the package name.
         **kwargs: https://bazel.build/reference/be/common-definitions#common-attributes
     """
-    _ros2_cc_target(cc_library, "c", name, ros2_package_name, **kwargs)
+    ros2_cc_library_info(name = name + "_metadata", ros2_package_name = ros2_package_name or name, visibility = kwargs.get("visibility"))
+    deps = kwargs.pop("deps", [])
+    deps.append(":" + name + "_metadata")
+    _ros2_cc_target(cc_library, "c", name, ros2_package_name, deps = deps, **kwargs)
 
 def ros2_cpp_library(name, ros2_package_name = None, **kwargs):
     """ Defines a ROS 2 C++ library.
@@ -51,7 +59,10 @@ def ros2_cpp_library(name, ros2_package_name = None, **kwargs):
             Otherwise, the `name` is used as the package name.
         **kwargs: https://bazel.build/reference/be/common-definitions#common-attributes
     """
-    _ros2_cc_target(cc_library, "cpp", name, ros2_package_name, **kwargs)
+    ros2_cc_library_info(name = name + "_metadata", ros2_package_name = ros2_package_name or name, visibility = kwargs.get("visibility"))
+    deps = kwargs.pop("deps", [])
+    deps.append(":" + name + "_metadata")
+    _ros2_cc_target(cc_library, "cpp", name, ros2_package_name, deps = deps, **kwargs)
 
 def ros2_c_binary(name, ros2_package_name = None, **kwargs):
     """ Defines a ROS 2 C binary.
@@ -64,7 +75,10 @@ def ros2_c_binary(name, ros2_package_name = None, **kwargs):
             Otherwise, the `name` is used as the package name.
         **kwargs: https://bazel.build/reference/be/common-definitions#common-attributes-binaries
     """
-    _ros2_cc_target(cc_binary, "c", name, ros2_package_name, **kwargs)
+    ros2_cc_binary_info(name = name + "_metadata", ros2_package_name = ros2_package_name or name, visibility = kwargs.get("visibility"))
+    deps = kwargs.pop("deps", [])
+    deps.append(":" + name + "_metadata")
+    _ros2_cc_target(cc_binary, "c", name, ros2_package_name, deps = deps, **kwargs)
 
 def _ros2_cpp_exec(target, name, ros2_package_name, set_up_ament, idl_deps, **kwargs):
     if idl_deps != None and len(idl_deps) > 0:
@@ -72,7 +86,10 @@ def _ros2_cpp_exec(target, name, ros2_package_name, set_up_ament, idl_deps, **kw
     is_test = target == cc_test
     set_up_launcher = is_test or set_up_ament
     if set_up_launcher == False:
-        _ros2_cc_target(target, "cpp", name, ros2_package_name, **kwargs)
+        ros2_cc_binary_info(name = name + "_metadata", ros2_package_name = ros2_package_name or name, visibility = kwargs.get("visibility"))
+        deps = kwargs.pop("deps", [])
+        deps.append(":" + name + "_metadata")
+        _ros2_cc_target(target, "cpp", name, ros2_package_name, deps = deps, **kwargs)
         return
 
     launcher_target_kwargs, binary_kwargs = split_kwargs(**kwargs)
