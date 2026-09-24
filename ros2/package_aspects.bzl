@@ -1,4 +1,4 @@
-load("@com_github_mvukov_rules_ros2//ros2:info.bzl", "Ros2BinInfo", "Ros2LibInfo")
+load("@com_github_mvukov_rules_ros2//ros2:info.bzl", "Ros2BinInfo", "Ros2LibInfo", "Ros2PyBinInfo", "Ros2PyLibInfo")
 load("@com_github_mvukov_rules_ros2//ros2:plugin_aspects.bzl", "get_transitive_items")
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 
@@ -93,4 +93,90 @@ ros2_binary_collector_aspect = aspect(
     implementation = _ros2_binary_collector_aspect_impl,
     attr_aspects = ["deps"],
     provides = [Ros2BinCollectorAspectInfo],
+)
+
+Ros2PyBinCollectorAspectInfo = provider(
+    doc = "Collects ROS 2 package names through a dependency graph.",
+    fields = {
+        "binaries": "depset of ROS 2 package names",
+    },
+)
+
+def create_py_binary_struct(target, info):
+    return struct(
+        target_name = target.label.name,
+        package_name = info.package_name,
+        binary = target[DefaultInfo].files.to_list()[0],
+    )
+
+def _ros2_py_binary_collector_aspect_impl(target, ctx):
+    direct_binaries = []
+
+    if ctx.rule.kind == "py_binary":
+        for dep in ctx.rule.attr.deps:
+            if Ros2PyBinInfo in dep:
+                direct_binaries.append(create_py_binary_struct(target, dep[Ros2PyBinInfo]))
+
+    transitive_binaries = get_transitive_items(
+        ctx,
+        Ros2PyBinCollectorAspectInfo,
+        "binaries",
+    )
+
+    return [
+        Ros2PyBinCollectorAspectInfo(
+            binaries = depset(
+                direct = direct_binaries,
+                transitive = transitive_binaries,
+            ),
+        ),
+    ]
+
+ros2_py_binary_collector_aspect = aspect(
+    implementation = _ros2_py_binary_collector_aspect_impl,
+    attr_aspects = ["deps"],
+    provides = [Ros2PyBinCollectorAspectInfo],
+)
+
+Ros2PyLibCollectorAspectInfo = provider(
+    doc = "Collects ROS 2 package names through a dependency graph.",
+    fields = {
+        "libraries": "depset of ROS 2 package names",
+    },
+)
+
+def create_py_library_struct(target, info):
+    return struct(
+        target_name = target.label.name,
+        package_name = info.package_name,
+        library = target[DefaultInfo].files.to_list()[0],
+    )
+
+def _ros2_py_library_collector_aspect_impl(target, ctx):
+    direct_libraries = []
+
+    if ctx.rule.kind == "py_library":
+        for dep in ctx.rule.attr.deps:
+            if Ros2PyLibInfo in dep:
+                direct_libraries.append(create_py_library_struct(target, dep[Ros2PyLibInfo]))
+
+    transitive_libraries = get_transitive_items(
+        ctx,
+        Ros2PyLibCollectorAspectInfo,
+        "libraries",
+    )
+
+    return [
+        Ros2PyLibCollectorAspectInfo(
+            libraries = depset(
+                direct = direct_libraries,
+                transitive = transitive_libraries,
+            ),
+        ),
+    ]
+
+ros2_py_library_collector_aspect = aspect(
+    implementation = _ros2_py_library_collector_aspect_impl,
+    attr_aspects = ["deps"],
+    provides = [Ros2PyLibCollectorAspectInfo],
 )

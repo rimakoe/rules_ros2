@@ -25,7 +25,7 @@ load("@rules_cc//cc:toolchain_utils.bzl", "find_cpp_toolchain")
 
 def _ros2_plugin_impl(ctx):
     target_name = ctx.attr.name
-    name = target_name + "/plugin"
+    name = target_name
     dynamic_library = create_dynamic_library(
         ctx,
         name = name,
@@ -67,7 +67,7 @@ def ros2_plugin(name, plugin_specs, **kwargs):
     types_to_bases_and_names = {}
     for plugin_spec in plugin_specs:
         class_type = plugin_spec["class_type"]
-        class_name = plugin_spec.get("class_name", class_type)
+        class_name = plugin_spec["class_name"]
         base_class_type = plugin_spec["base_class_type"]
         types_to_bases_and_names[class_type] = [base_class_type, class_name]
 

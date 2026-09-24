@@ -67,6 +67,9 @@ def get_transitive_items(ctx, aspect_name, item_name):
 
 def _ros2_plugin_collector_aspect_impl(target, ctx):
     direct_plugins = []
+    # print("KIND:", ctx.rule.kind)
+    # print("visited " + target.label.name)
+
     if ctx.rule.kind == "ros2_plugin_rule":
         direct_plugins.append(target[Ros2PluginInfo])
 
@@ -165,7 +168,7 @@ def _ros2_idl_plugin_aspect_impl(target, ctx):
     cc_info = target[CppGeneratorAspectInfo].cc_info
     dynamic_library = create_dynamic_library(
         ctx,
-        name = package_name + "/plugin",
+        name = package_name,
         compilation_outputs = target[CppGeneratorAspectInfo].compilation_outputs,
         linking_contexts = [cc_info.linking_context],
     )

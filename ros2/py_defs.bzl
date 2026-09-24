@@ -2,6 +2,7 @@
 """
 
 load("@com_github_mvukov_rules_ros2//ros2:ament.bzl", "py_exec_launcher", "split_kwargs")
+load("@com_github_mvukov_rules_ros2//ros2:info.bzl", "ros2_py_binary_info", "ros2_py_library_info")
 load("@com_github_mvukov_rules_ros2//third_party:symlink.bzl", "symlink")
 load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
 
@@ -9,22 +10,33 @@ def ros2_py_library(name, srcs, ros2_package_name = None, deps = None, **kwargs)
     if deps == None:
         deps = []
     ros2_package_name = ros2_package_name or name
+    ros2_py_library_info(name = name + "_metadata", ros2_package_name = ros2_package_name or name, visibility = kwargs.get("visibility"))
+    deps = kwargs.pop("deps", [])
+    deps.append(":" + name + "_metadata")
     py_library(name = name, srcs = srcs, deps = deps, **kwargs)
 
-def _ros2_py_exec(target, name, srcs, main, set_up_ament, testonly, **kwargs):
+def _ros2_py_exec(target, name, srcs, main, set_up_ament, testonly, ros2_package_name = None, **kwargs):
     set_up_launcher = testonly or set_up_ament
+    ros2_package_name = ros2_package_name or name
     if set_up_launcher == False:
-        target(name = name, srcs = srcs, main = main, **kwargs)
+        ros2_py_binary_info(name = name + "_metadata", ros2_package_name = ros2_package_name or name, visibility = kwargs.get("visibility"))
+        deps = kwargs.pop("deps", [])
+        deps.append(":" + name + "_metadata")
+        target(name = name, srcs = srcs, main = main, deps = deps, **kwargs)
         return
 
     launcher_target_kwargs, binary_kwargs = split_kwargs(**kwargs)
     target_impl = name + "_impl"
+    ros2_py_binary_info(name = name + "_metadata", ros2_package_name = ros2_package_name or name, visibility = binary_kwargs.get("visibility"))
+    deps = binary_kwargs.pop("deps", [])
+    deps.append(":" + name + "_metadata")
     target(
         name = target_impl,
         srcs = srcs,
         main = main,
         tags = ["manual"],
         testonly = testonly,
+        deps = deps,
         **binary_kwargs
     )
 
@@ -59,7 +71,7 @@ def _ros2_py_exec(target, name, srcs, main, set_up_ament, testonly, **kwargs):
         **launcher_target_kwargs
     )
 
-def ros2_py_binary(name, srcs, main, set_up_ament = False, **kwargs):
+def ros2_py_binary(name, srcs, main, ros2_package_name = None, set_up_ament = False, **kwargs):
     """ Defines a ROS 2 Python binary.
 
     Args:
@@ -76,10 +88,11 @@ def ros2_py_binary(name, srcs, main, set_up_ament = False, **kwargs):
         main,
         set_up_ament,
         testonly = False,
+        ros2_package_name = ros2_package_name,
         **kwargs
     )
 
-def ros2_py_test(name, srcs, main, set_up_ament = True, **kwargs):
+def ros2_py_test(name, srcs, main, ros2_package_name = None, set_up_ament = True, **kwargs):
     """ Defines a ROS 2 Python test.
 
     Defaults ROS_HOME and ROS_LOG_DIR to $TEST_UNDECLARED_OUTPUTS_DIR (if set,
@@ -102,10 +115,11 @@ def ros2_py_test(name, srcs, main, set_up_ament = True, **kwargs):
         main,
         set_up_ament,
         testonly = True,
+        ros2_package_name = ros2_package_name,
         **kwargs
     )
 
-def ros2_py_exec(name, srcs, main, rule_impl, set_up_ament, testonly, **kwargs):
+def ros2_py_exec(name, srcs, main, rule_impl, set_up_ament, testonly, ros2_package_name = None, **kwargs):
     """ Defines a ROS 2 Python target using a user-specified rule.
 
     Args:
@@ -127,5 +141,6 @@ def ros2_py_exec(name, srcs, main, rule_impl, set_up_ament, testonly, **kwargs):
         main = main,
         set_up_ament = set_up_ament,
         testonly = testonly,
+        ros2_package_name = ros2_package_name,
         **kwargs
     )

@@ -84,7 +84,7 @@ def ros2_package(package_name):
     def py_binary(name, **kwargs):
         ros2_py_binary(
             name = name,
-            #ros2_package_name = package_name,
+            ros2_package_name = package_name,
             **kwargs
         )
         deps.append(":" + name)
